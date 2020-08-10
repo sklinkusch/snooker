@@ -32,5 +32,5 @@ scoreboard if the current player scores as many points as possible from now on.
 - scores of his opponent (constant)
 - difference of scores
 - number of remaining points on the table
-- the letter "S" if the opponent needs foul points to win the frame
+- the letter "S" if the opponent needs foul points to win the frame, the letter "B" if a respotted black ball has to decide the frame
 - the color of the currently played ball
