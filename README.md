@@ -5,12 +5,14 @@ Snooker match.
 
 ## Usage
 
-`./snooker.pl 69 55 3 1 1 1 1 1 1`
+`./snooker.pl 69 55 r 3 1 1 1 1 1 1`
 
 ### Arguments
 
 - scores of current player
 - scores of his opponent
+- next ball to play (r/R for red ball or if only colors are available, c/C for
+  color if played after a red ball)
 - number of remaining red balls on the table (0...15)
 - number of remaining yellow balls on the table (0...1)
 - number of remaining green balls on the table (0...1)
