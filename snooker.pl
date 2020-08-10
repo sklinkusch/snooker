@@ -66,13 +66,14 @@ my $currentRemaining;
 my $ifsnooker;
 
 print "PlayerA  PlayerB  Lead  Rem. Sn. Col.\n";
-printf "    %3i      %3i  %+4i  %3i\n", $PlayerA, $PlayerB, $lead, $remaining;
+$ifsnooker = getSnooker($lead, $remaining);
+printResult($PlayerA, $PlayerB, $lead, $remaining, $ifsnooker, " ");
 
 if ($next eq "c") {
 	$aExtra += 7;
 	$currentLead = getLead($PlayerA+$aExtra,$PlayerB);
 	$currentRemaining = getRemaining($balls{red}, $balls{yellow}, $balls{green}, $balls{brown}, $balls{blue}, $balls{pink}, $balls{black});
-	$ifsnooker = $currentLead > $currentRemaining ? "S" : " ";
+	$ifsnooker = getSnooker($currentLead, $currentRemaining);
 	printResult($PlayerA+$aExtra, $PlayerB, $currentLead, $currentRemaining, $ifsnooker, "black");
 }
 
@@ -81,11 +82,11 @@ if ($balls{red} > 0) {
 		$aExtra++;
 		$currentLead = getLead($PlayerA+$aExtra, $PlayerB);
 		$currentRemaining = getRemaining($balls{red}-$x, $balls{yellow}, $balls{green}, $balls{brown}, $balls{blue}, $balls{pink}, $balls{black});
-		$ifsnooker = $currentLead > $currentRemaining ? "S" : " ";
+		$ifsnooker = getSnooker($currentLead, $currentRemaining);
 		printResult($PlayerA+$aExtra, $PlayerB, $currentLead, $currentRemaining, $ifsnooker, "red");
 		$aExtra += 7;
 		$currentLead = getLead($PlayerA+$aExtra, $PlayerB);
-		$ifsnooker = $currentLead > $currentRemaining ? "S" : " ";
+		$ifsnooker = getSnooker($currentLead, $currentRemaining);
 		printResult($PlayerA+$aExtra, $PlayerB, $currentLead, $currentRemaining, $ifsnooker, "black");
 	}
 }
@@ -96,7 +97,7 @@ foreach my $y (0..$#colors){
 		$balls{$colors[$y]} = 0;
 		$currentLead = getLead($PlayerA+$aExtra, $PlayerB);
 		$currentRemaining = getRemaining(0, $balls{yellow}, $balls{green}, $balls{brown}, $balls{blue}, $balls{pink}, $balls{black});
-		$ifsnooker = $currentLead > $currentRemaining ? "S" : " ";
+		$ifsnooker = getSnooker($currentLead, $currentRemaining);
 		printResult($PlayerA+$aExtra, $PlayerB, $currentLead, $currentRemaining, $ifsnooker, $colors[$y]);
 	} else {
 		next;
@@ -122,6 +123,19 @@ sub getRemaining {
 	return $res;
 }
 
+sub getSnooker {
+	my ($ld, $rm) = @_;
+	my $res;
+	my $diff = $ld - $rm;
+	if($diff > 0){
+		$res = "S";
+	} elsif($diff == 0){
+		$res = "B";
+	} else {
+		$res = " ";
+	}
+	return $res;
+}
 
 sub printResult {
 	my ($A, $B, $ld, $rm, $sn, $col) = @_;
