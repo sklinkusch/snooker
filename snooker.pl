@@ -2,26 +2,33 @@
 
 use strict;
 use warnings;
+no warnings 'experimental';
 use diagnostics;
 use Scalar::Util qw(looks_like_number);
 
-if($#ARGV != 8) {
-	print "Usage: ./snooker.pl scoreA scoreB red yellow green brown blue pink black\n";
+if($#ARGV != 9) {
+	print "Usage: ./snooker.pl scoreA scoreB next red yellow green brown blue pink black\n";
+	print "next: r/R for red ball or c/C for color\n";
 	exit;
 }
 
 my $PlayerA = join("", $ARGV[0]);
 my $PlayerB = join("", $ARGV[1]);
+my $next = lc(join("", $ARGV[2]));
+if (!$next ~~ ["r", "c"]) {
+	print "Argument must be either r/R for red ball or c/C for color\n";
+	exit;
+}
 
 my @colors = ("yellow", "green", "brown", "blue", "pink", "black");
 my %balls = (
-	"red" => join("", $ARGV[2]),
-	"yellow" => join("", $ARGV[3]),
-	"green" => join("", $ARGV[4]),
-	"brown" => join("", $ARGV[5]),
-	"blue" => join("", $ARGV[6]),
-	"pink" => join("", $ARGV[7]),
-	"black" => join("", $ARGV[8])
+	"red" => join("", $ARGV[3]),
+	"yellow" => join("", $ARGV[4]),
+	"green" => join("", $ARGV[5]),
+	"brown" => join("", $ARGV[6]),
+	"blue" => join("", $ARGV[7]),
+	"pink" => join("", $ARGV[8]),
+	"black" => join("", $ARGV[9])
 );
 my %minimum;
 my %maximum;
@@ -54,21 +61,32 @@ foreach my $zy (0..$#keys) {
 my $lead = getLead($PlayerA, $PlayerB);
 my $remaining = getRemaining($balls{red}, $balls{yellow}, $balls{green}, $balls{brown}, $balls{blue}, $balls{pink}, $balls{black});
 my $aExtra = 0;
+my $currentLead;
+my $currentRemaining;
+my $ifsnooker;
 
 print "PlayerA  PlayerB  Lead  Rem. Sn. Col.\n";
 printf "    %3i      %3i  %+4i  %3i\n", $PlayerA, $PlayerB, $lead, $remaining;
 
+if ($next eq "c") {
+	$aExtra += 7;
+	$currentLead = getLead($PlayerA+$aExtra,$PlayerB);
+	$currentRemaining = getRemaining($balls{red}, $balls{yellow}, $balls{green}, $balls{brown}, $balls{blue}, $balls{pink}, $balls{black});
+	$ifsnooker = $currentLead > $currentRemaining ? "S" : " ";
+	printResult($PlayerA+$aExtra, $PlayerB, $currentLead, $currentRemaining, $ifsnooker, "black");
+}
+
 if ($balls{red} > 0) {
 	foreach my $x (1..$balls{red}) {
 		$aExtra++;
-		my $currentLead = getLead($PlayerA+$aExtra, $PlayerB);
-		my $currentRemaining = getRemaining($balls{red}-$x, $balls{yellow}, $balls{green}, $balls{brown}, $balls{blue}, $balls{pink}, $balls{black});
-		my $ifsnooker = $currentLead > $currentRemaining ? "S" : " ";
-		printf "    %3i      %3i  %+4i  %3i  %s   %s\n", $PlayerA+$aExtra, $PlayerB, $currentLead, $currentRemaining, $ifsnooker, "red";
+		$currentLead = getLead($PlayerA+$aExtra, $PlayerB);
+		$currentRemaining = getRemaining($balls{red}-$x, $balls{yellow}, $balls{green}, $balls{brown}, $balls{blue}, $balls{pink}, $balls{black});
+		$ifsnooker = $currentLead > $currentRemaining ? "S" : " ";
+		printResult($PlayerA+$aExtra, $PlayerB, $currentLead, $currentRemaining, $ifsnooker, "red");
 		$aExtra += 7;
 		$currentLead = getLead($PlayerA+$aExtra, $PlayerB);
 		$ifsnooker = $currentLead > $currentRemaining ? "S" : " ";
-		printf "    %3i      %3i  %+4i  %3i  %s   %s\n", $PlayerA+$aExtra, $PlayerB, $currentLead, $currentRemaining, $ifsnooker, "black";
+		printResult($PlayerA+$aExtra, $PlayerB, $currentLead, $currentRemaining, $ifsnooker, "black");
 	}
 }
 
@@ -76,10 +94,10 @@ foreach my $y (0..$#colors){
 	if($balls{$colors[$y]} == 1){
 		$aExtra += $points{$colors[$y]};
 		$balls{$colors[$y]} = 0;
-		my $currentLead = getLead($PlayerA+$aExtra, $PlayerB);
-		my $currentRemaining = getRemaining(0, $balls{yellow}, $balls{green}, $balls{brown}, $balls{blue}, $balls{pink}, $balls{black});
-		my $ifsnooker = $currentLead > $currentRemaining ? "S" : " ";
-		printf "    %3i      %3i  %+4i  %3i  %s   %s\n", $PlayerA+$aExtra, $PlayerB, $currentLead, $currentRemaining, $ifsnooker, $colors[$y];
+		$currentLead = getLead($PlayerA+$aExtra, $PlayerB);
+		$currentRemaining = getRemaining(0, $balls{yellow}, $balls{green}, $balls{brown}, $balls{blue}, $balls{pink}, $balls{black});
+		$ifsnooker = $currentLead > $currentRemaining ? "S" : " ";
+		printResult($PlayerA+$aExtra, $PlayerB, $currentLead, $currentRemaining, $ifsnooker, $colors[$y]);
 	} else {
 		next;
 	}
@@ -102,4 +120,10 @@ sub getRemaining {
 	$res += $pink * $points{pink};
 	$res += $black * $points{black};
 	return $res;
+}
+
+
+sub printResult {
+	my ($A, $B, $ld, $rm, $sn, $col) = @_;
+	printf "    %3i      %3i  %+4i  %3i  %s   %s\n", $A, $B, $ld, $rm, $sn, $col;
 }
